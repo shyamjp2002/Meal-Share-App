@@ -121,7 +121,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                      padding: EdgeInsets.all(16.0),
                       child: QrImageView(
-                        data: 'https://example.com',
+                        data: _userUid.toString(),
                         version: QrVersions.auto,
                         size: 200.0,
                       ),

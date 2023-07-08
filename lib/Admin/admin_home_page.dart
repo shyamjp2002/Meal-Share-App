@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../firebase_options.dart';
 import './admin_appbar.dart';
 import './admin_inmates.dart';
+import './admin_qr_scanner.dart';
+import 'package:camera/camera.dart';
 
 class AdminHomePage extends StatefulWidget {
 
@@ -176,8 +178,15 @@ class _AdminHomePageState extends State<AdminHomePage> {
               child: Padding(
                 padding: EdgeInsets.only(bottom: 40),
                 child: IconButton(
-                  onPressed: () {
-                    // TODO: Add button functionality
+                  onPressed: () async {
+                    final cameras = await availableCameras();
+                    final firstCamera = cameras.first;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => QRCodeScannerApp(camera: firstCamera),
+                      ),
+                    );
                   },
                   icon: Icon(Icons.qr_code_scanner),
                   iconSize: 40,

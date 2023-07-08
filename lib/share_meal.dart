@@ -207,6 +207,7 @@ class _ShareMealState extends State<ShareMeal> {
       'meal_id': meal_id,
       'issueDate': issueDate,
       'status': 'Active',
+      'isCompleted': 'No',
     };
 
     await FirebaseFirestore.instance
