@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import './app_appbar.dart';
 import './app_drawer.dart';
 import 'package:intl/intl.dart';
+import './shared_slots.dart' ;
 
 class ShareMeal extends StatefulWidget {
   const ShareMeal({Key? key}) : super(key: key);
@@ -54,7 +55,7 @@ class _ShareMealState extends State<ShareMeal> {
       body: Stack(
         children: [
           Padding(
-            padding: EdgeInsets.only(top: 20),
+            padding: EdgeInsets.only(top: 70),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -64,13 +65,16 @@ class _ShareMealState extends State<ShareMeal> {
                       _showDatePicker(context);
                     },
                     child: Container(
-                      height: 100,
-                      width: 200,
+                      height: 90,
+                      width: 360,
                       padding: EdgeInsets.all(30),
                       alignment: Alignment.topCenter,
                       decoration: BoxDecoration(
-                        color: Colors.green,
-                        border: Border.all(color: Colors.black, width: 4),
+                        color: Color(0xFF449183),
+                        borderRadius: BorderRadius.circular(20.0),
+                        border: Border.all(
+                            color: const Color.fromARGB(255, 255, 255, 255),
+                            width: 2),
                         boxShadow: const [
                           BoxShadow(
                             color: Colors.black,
@@ -83,7 +87,9 @@ class _ShareMealState extends State<ShareMeal> {
                         selectedDate != null
                             ? selectedDate.toString()
                             : "Select Date",
-                        style: TextStyle(fontSize: 25, color: Colors.yellow),
+                        style: TextStyle(
+                            fontSize: 25,
+                            color: const Color.fromARGB(255, 255, 255, 255)),
                       ),
                     ),
                   ),
@@ -93,45 +99,90 @@ class _ShareMealState extends State<ShareMeal> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ToggleButton(
-                        text: "Breakfast",
-                        onPressed: () {
-                          _toggleOption("Breakfast");
-                        },
-                        isSelected: selectedOptions.contains("Breakfast"),
-                      ),
-                      SizedBox(width: 20),
-                      ToggleButton(
-                        text: "Lunch",
-                        onPressed: () {
-                          _toggleOption("Lunch");
-                        },
-                        isSelected: selectedOptions.contains("Lunch"),
-                      ),
-                      SizedBox(width: 20),
-                      ToggleButton(
-                        text: "Dinner",
-                        onPressed: () {
-                          _toggleOption("Dinner");
-                        },
-                        isSelected: selectedOptions.contains("Dinner"),
-                      ),
+                      // ToggleButton(
+                      //   text: "Breakfast",
+                      //   onPressed: () {
+                      //     _toggleOption("Breakfast");
+                      //   },
+                      //   isSelected: selectedOptions.contains("Breakfast"),
+                      // ),
+                      // SizedBox(width: 35),
+                      // ToggleButton(
+                      //   text: "Lunch",
+                      //   onPressed: () {
+                      //     _toggleOption("Lunch");
+                      //   },
+                      //   isSelected: selectedOptions.contains("Lunch"),
+                      // ),
+                      // SizedBox(width: 35),
+                      // ToggleButton(
+                      //   text: "Dinner",
+                      //   onPressed: () {
+                      //     _toggleOption("Dinner");
+                      //   },
+                      //   isSelected: selectedOptions.contains("Dinner"),
+                      // ),
+                      Container(
+  width: 100,
+  height: 40,
+  child: ToggleButton(
+    text: "Breakfast",
+    onPressed: () {
+      _toggleOption("Breakfast");
+    },
+    isSelected: selectedOptions.contains("Breakfast"),
+  ),
+),
+SizedBox(width: 35),
+Container(
+  width: 100,
+  height: 40,
+  child: ToggleButton(
+    text: "Lunch",
+    onPressed: () {
+      _toggleOption("Lunch");
+    },
+    isSelected: selectedOptions.contains("Lunch"),
+  ),
+),
+SizedBox(width: 35),
+Container(
+  width: 100,
+  height: 40,
+  child: ToggleButton(
+    text: "Dinner",
+    onPressed: () {
+      _toggleOption("Dinner");
+    },
+    isSelected: selectedOptions.contains("Dinner"),
+  ),
+),
+
                     ],
                   ),
                   SizedBox(height: 75),
-                  if (selectedOptions.isNotEmpty)
-                    Text(
-                      "Selected Options: ${selectedOptions.join(", ")}",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
                   SizedBox(height: 20),
-                  _isLoading
-                      ? CircularProgressIndicator()
-                      : ElevatedButton(
-                          onPressed: _handleSubmit,
-                          child: Text("Submit"),
-                        ),
+                  Container(
+                    width: 350, // Set the desired width
+                    child: _isLoading
+                        ? CircularProgressIndicator()
+                        : ElevatedButton(
+                            onPressed: (){
+                              _handleSubmit(context);
+                              },
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(40.0),
+                              ),
+                              padding: EdgeInsets.symmetric(vertical: 16.0),
+                              backgroundColor: Color.fromARGB(255, 68, 145, 131),
+                              elevation: 4.0,
+                              shadowColor: Color.fromARGB(255, 4, 3, 3),
+                              
+                            ),
+                            child: Text("Submit",style: TextStyle(fontSize: 20.0),),
+                          ),
+                  )
                 ],
               ),
             ),
@@ -176,7 +227,7 @@ class _ShareMealState extends State<ShareMeal> {
     });
   }
 
-  void _handleSubmit() async {
+  Future<void> _handleSubmit(BuildContext context) async {
     setState(() {
       _isLoading = true;
     });
@@ -217,6 +268,11 @@ class _ShareMealState extends State<ShareMeal> {
     setState(() {
       _isLoading = false;
     });
+    Navigator.push (
+      context,
+      MaterialPageRoute(builder: (context) => SharedMeal()),
+    );
+    
   }
 
   Future<void> getData() async {
@@ -265,7 +321,7 @@ class _ToggleButtonState extends State<ToggleButton> {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed:widget.onPressed,
+      onPressed: widget.onPressed,
       style: ElevatedButton.styleFrom(
         primary: widget.isSelected ? Colors.blue : Colors.grey,
       ),
@@ -273,5 +329,3 @@ class _ToggleButtonState extends State<ToggleButton> {
     );
   }
 }
-
-

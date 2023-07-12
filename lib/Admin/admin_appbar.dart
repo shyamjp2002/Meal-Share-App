@@ -27,7 +27,7 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
           onPressed: () async {
             await GoogleSignIn().signOut();
             FirebaseAuth.instance.signOut();
-            Navigator.pushReplacement(
+            Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => AdminLoginPage()),
             );

@@ -6,6 +6,8 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import './getprofile.dart';
+import 'admin_slot_qr.dart';
 
 class QRCodeScannerApp extends StatefulWidget {
   final CameraDescription camera;
@@ -21,6 +23,7 @@ class _QRCodeScannerAppState extends State<QRCodeScannerApp> {
   late QRViewController _qrController;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   String scannedData = '';
+  bool isCameraPaused = false;
 
   @override
   void initState() {
@@ -52,7 +55,7 @@ class _QRCodeScannerAppState extends State<QRCodeScannerApp> {
         ),
         body: Stack(
           children: [
-            CameraPreview(_controller),
+            if (!isCameraPaused) CameraPreview(_controller),
             Positioned.fill(
               child: QRView(
                 key: qrKey,
@@ -101,18 +104,25 @@ class _QRCodeScannerAppState extends State<QRCodeScannerApp> {
       setState(() {
         scannedData = scanData.code.toString();
       });
-      _processScannedData(
-          scannedData); // Call your function here with the scanned data
+      _processScannedData(scannedData);
     });
   }
 
   void _processScannedData(String data) {
-    markAttendance(context, data,
-        true); // Mark attendance with scannedData as the inmateId
+    markAttendance(context, data, true);
+    _pauseCamera();
   }
 
-  Future<void> markAttendance(
-      BuildContext context, String inmateId, bool isPresent) async {
+  void _pauseCamera() {
+    _qrController.pauseCamera();
+    _controller.stopImageStream();
+    setState(() {
+      isCameraPaused = true;
+    });
+  }
+
+  Future<void> markAttendance(BuildContext context, String inmateId, bool isPresent) async {
+  if (inmateId.length > 20) {
     try {
       final adminHostelSnapshot = await FirebaseFirestore.instance
           .collection('hostel_admins')
@@ -151,6 +161,12 @@ class _QRCodeScannerAppState extends State<QRCodeScannerApp> {
 
       if (hostelNameCollectionSnapshot.docs.isEmpty) {
         if (adminHostelName == inmateHostelName) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProfilePage(uid: scannedData),
+            ),
+          );
           await attendanceRef.doc(inmateId).set({
             'present': isPresent,
             'timestamp': FieldValue.serverTimestamp(),
@@ -178,8 +194,15 @@ class _QRCodeScannerAppState extends State<QRCodeScannerApp> {
                 actions: [
                   ElevatedButton(
                     child: Text('OK'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
+                    onPressed: () async {
+                      final cameras = await availableCameras();
+                      final firstCamera = cameras.first;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                QRCodeScannerApp(camera: firstCamera)),
+                      );
                     },
                   ),
                 ],
@@ -187,13 +210,83 @@ class _QRCodeScannerAppState extends State<QRCodeScannerApp> {
             },
           );
         } else {
-          print('Attendance is already marked but with a different status.');
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Meal Slot Already Marked'),
+                content: Text('This meal slot is already marked as completed.'),
+                actions: [
+                  ElevatedButton(
+                    child: Text('OK'),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              );
+            },
+          );
         }
       }
     } catch (error) {
       print('Error marking attendance: $error');
     }
+  } else {
+    try {
+      final mealSlotsSnapshot = await FirebaseFirestore.instance
+          .collection('Share_meal_slots')
+          .where('meal_id', isEqualTo: inmateId)
+          .where('status', isEqualTo: 'Sold')
+          .get();
+
+      if (mealSlotsSnapshot.docs.isNotEmpty) {
+        final mealSlotDoc = mealSlotsSnapshot.docs.first;
+
+        if (mealSlotDoc.get('isCompleted') == 'No') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SlotQrView(mealId: inmateId, hostel: mealSlotDoc.get('hostel'), Date: mealSlotDoc.get('Date'), status: mealSlotDoc.get('status'),),
+            ),
+          );
+          await mealSlotDoc.reference.update({'isCompleted': 'Yes'});
+          print('Meal slot marked as completed!');
+        } else {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Meal Slot Already Marked'),
+                content: Text('This meal slot is already marked as completed.'),
+                actions: [
+                  ElevatedButton(
+                    child: Text('OK'),
+                    onPressed: () async{
+                      final cameras = await availableCameras();
+                      final firstCamera = cameras.first;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                QRCodeScannerApp(camera: firstCamera)),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      } else {
+        print('No meal slot found with the given inmate ID and status.');
+      }
+    } catch (error) {
+      print('Error fetching meal slots: $error');
+    }
   }
+}
+
 }
 
 void main() async {

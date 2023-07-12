@@ -37,61 +37,104 @@ class LoginPage extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.white,
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                                ),
-                                onPressed: () {
-                                  signInWithGoogle(context);
-                                },
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Image.asset(
-                                      'assets/google-logo.png',
-                                      height: 24,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Sign in with Google',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.black,
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Expanded(
+                                    child:
+                                        Container()), // Empty container to push button to the bottom
+                                Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: FractionallySizedBox(
+                                    widthFactor:
+                                        1, // Adjust this value to set the desired width percentage
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        primary: Colors.white,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 50, vertical: 8),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              50), // Adjust this value to set the desired border radius
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        signInWithGoogle(context);
+                                      },
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Image.asset(
+                                            'assets/google-logo.png',
+                                            height: 24,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'Sign in with Google',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color:
+                                                  Color.fromARGB(255, 0, 0, 0),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
+                              ],
+                            )),
                       ),
                       Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => AdminLoginPage()),
-                            );
-                          },
-                          child: Text(
-                            'Admin Login',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black,
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => AdminLoginPage()),
+                              );
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.admin_panel_settings,
+                                  color: Colors.black,
+                                  size: 24,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Admin Login',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Color.fromARGB(255, 0, 0, 0),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            style: ButtonStyle(
+                              minimumSize: MaterialStateProperty.all<Size>(
+                                Size(330.0, 40.0),
+                              ),
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                Color.fromARGB(255, 254, 254, 254),
+                              ),
+                              shape: MaterialStateProperty.all<OutlinedBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25.0),
+                                  side: BorderSide(
+                                    color: Color.fromARGB(255, 255, 255, 255),
+                                    width: 1.0,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
+                          ),
+                          const SizedBox(height: 75.0),
                     ],
                   ),
                 ),
@@ -167,28 +210,30 @@ class LoginPage extends StatelessWidget {
                 builder: (context) =>
                     GuestHomePage()), // Navigate to Messcut widget
           );
-        }
-        else{
+        } else {
           Map<String, String> dataToSave = {
-          'uid': uid,
-          'name': userName!,
-          'email': email!,
-        };
-        await FirebaseFirestore.instance
-            .collection('guest_users')
-            .add(dataToSave);
-            print("guest user registered successfully");
-            Navigator.push(
+            'uid': uid,
+            'name': userName!,
+            'email': email!,
+          };
+          await FirebaseFirestore.instance
+              .collection('guest_users')
+              .add(dataToSave);
+          print("guest user registered successfully");
+          Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) =>
                     GuestHomePage()), // Navigate to Messcut widget
           );
         }
-        
       }
     }
 
     print(userCredential.user?.displayName);
   }
+}
+
+void main() async {
+  runApp(LoginPage());
 }

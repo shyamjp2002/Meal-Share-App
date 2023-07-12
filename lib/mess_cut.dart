@@ -104,15 +104,17 @@ class _MyWidgetState extends State<Messcut> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      SizedBox(height: 20),
+                      SizedBox(height: 100),
                       Container(
-                        height: 250,
-                        width: 250,
+                        height: 220,
+                        width: 300,
                         padding: EdgeInsets.all(30),
                         alignment: Alignment.topCenter,
                         decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 17, 138, 21),
-                          border: Border.all(color: Colors.yellow, width: 5),
+                          color: Color(0xFF449183),
+                          border: Border.all(
+                              color: const Color.fromARGB(255, 255, 255, 255),
+                              width: 1),
                           borderRadius: BorderRadius.circular(50),
                           boxShadow: const [
                             BoxShadow(
@@ -132,7 +134,7 @@ class _MyWidgetState extends State<Messcut> {
                               ),
                             ),
                             InkWell(
-                              onTap: () =>_selectStartDate(context),
+                              onTap: () => _selectStartDate(context),
                               child: IgnorePointer(
                                 child: TextField(
                                   controller: _startDateController,
@@ -170,80 +172,58 @@ class _MyWidgetState extends State<Messcut> {
                       ),
                       SizedBox(height: 100),
                       ElevatedButton(
-                        onPressed: () async {
-                          setState(() {
-                            _isLoading = true;
-                          });
+                          onPressed: () async {
+                            setState(() {
+                              _isLoading = true;
+                            });
 
-                          String mess_cut_id = Uuid().v4();
-                          QuerySnapshot snapshot =
-                              await FirebaseFirestore.instance
-                                  .collection('users')
-                                  .where('uid', isEqualTo: userUid)
-                                  .get();
-                          documentId = snapshot.docs[0].id;
+                            String mess_cut_id = Uuid().v4();
+                            QuerySnapshot snapshot = await FirebaseFirestore
+                                .instance
+                                .collection('users')
+                                .where('uid', isEqualTo: userUid)
+                                .get();
+                            documentId = snapshot.docs[0].id;
 
-                          DocumentReference? userDocRef =
-                              FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(documentId!);
-                          DocumentSnapshot docSnapshot =
-                              await userDocRef!.get();
-                          hostelName = docSnapshot.get('hostel');
-                          userName = docSnapshot.get('name');
+                            DocumentReference? userDocRef = FirebaseFirestore
+                                .instance
+                                .collection('users')
+                                .doc(documentId!);
+                            DocumentSnapshot docSnapshot =
+                                await userDocRef!.get();
+                            hostelName = docSnapshot.get('hostel');
+                            userName = docSnapshot.get('name');
 
-                          Map<String, String> dataToSave = {
-                            'from': selectedStartDate!,
-                            'to': selectedEndDate!,
-                            'uid': userUid!,
-                            'hostel': hostelName!,
-                            'name': userName!,
-                            'mess_cut_id': mess_cut_id,
-                          };
+                            Map<String, String> dataToSave = {
+                              'from': selectedStartDate!,
+                              'to': selectedEndDate!,
+                              'uid': userUid!,
+                              'hostel': hostelName!,
+                              'name': userName!,
+                              'mess_cut_id': mess_cut_id,
+                            };
 
-                          await FirebaseFirestore.instance
-                              .collection('mess_cuts')
-                              .add(dataToSave);
+                            await FirebaseFirestore.instance
+                                .collection('mess_cuts')
+                                .add(dataToSave);
 
-                          setState(() {
-                            _isLoading = false;
-                          });
-                        },
-                        child: Text('SUBMIT'),
-                        style: ElevatedButton.styleFrom(
-                          primary: Colors.blue,
-                          onPrimary: Colors.white,
-                          textStyle: TextStyle(fontSize: 16),
-                          padding: EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 24),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 50),
+                            backgroundColor: Color.fromARGB(255, 68, 145, 131),
+                            elevation: 4.0,
+                            shadowColor: Color.fromARGB(255, 4, 3, 3),
                           ),
-                          elevation: 4,
-                        ),
-                      ),
-                      SizedBox(height: 50),
-                      Divider(
-                        color: Colors.grey,
-                        thickness: 1,
-                        indent: 20,
-                        endIndent: 20,
-                      ),
-                      SizedBox(height: 50),
-                      Text(
-                        'Additional Information',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Text(
-                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
+                          child: Text(
+                            'Submit',
+                            style: TextStyle(fontSize: 18.0),
+                          )),
                     ],
                   ),
                 ),

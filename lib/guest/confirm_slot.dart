@@ -1,17 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import './guest_appbar.dart';
+import './slot_details.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
-class ConfirmSlotPage extends StatelessWidget {
+class ConfirmSlotPage extends StatefulWidget {
   final String mealId;
 
-   ConfirmSlotPage({required this.mealId});
+  ConfirmSlotPage({required this.mealId});
+
+  @override
+  State<ConfirmSlotPage> createState() => _ConfirmSlotPageState();
+}
+
+class _ConfirmSlotPageState extends State<ConfirmSlotPage> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void updateSlotStatus(String mealId) async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('Share_meal_slots')
+          .where('meal_id', isEqualTo: mealId)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
+        String documentId = documentSnapshot.id;
+
+        await FirebaseFirestore.instance
+            .collection('Share_meal_slots')
+            .doc(documentId)
+            .update({
+          'status': 'Sold',
+          'guest_uid': FirebaseAuth.instance.currentUser!.uid,
+          'isCompleted': 'No',
+        });
+
+        print('Slot updated successfully');
+      } else {
+        print('No matching document found');
+      }
+    } catch (error) {
+      print('Error updating slot: $error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<QuerySnapshot>(
       future: FirebaseFirestore.instance
           .collection('Share_meal_slots')
-          .where('meal_id', isEqualTo: mealId)
+          .where('meal_id', isEqualTo: widget.mealId)
           .get(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
@@ -22,18 +65,20 @@ class ConfirmSlotPage extends StatelessWidget {
             final hostel = data['hostel'];
             final issueDate = data['Date'];
             final status = data['status'];
-            
 
             return Scaffold(
+              appBar: GuestAppBar(title: 'Confirm Slot'),
               body: Stack(
                 children: [
                   Container(
                     color: const Color(0xFF449183),
-                    child:  Center(
-                      child: ElevatedCard(hostel: hostel,
-  issueDate: issueDate,
-  status: status,
-  mealId: mealId,),
+                    child: Center(
+                      child: ElevatedCard(
+                        hostel: hostel,
+                        issueDate: issueDate,
+                        status: status,
+                        mealId: widget.mealId,
+                      ),
                     ),
                   ),
                   Positioned(
@@ -51,7 +96,7 @@ class ConfirmSlotPage extends StatelessWidget {
                         children: [
                           ElevatedButton(
                             onPressed: () {
-                              // Go Back button functionality here
+                              Navigator.pop(context);
                               print('Go Back button pressed');
                             },
                             style: ElevatedButton.styleFrom(
@@ -69,7 +114,43 @@ class ConfirmSlotPage extends StatelessWidget {
                           ),
                           ElevatedButton(
                             onPressed: () {
-                              // Button functionality
+                              Razorpay _razorpay = Razorpay();
+
+                              var options = {
+                                'key': 'rzp_test_NFTzY8U2i63OGJ',
+                                'amount':
+                                    3500, //in the smallest currency sub-unit.
+                                'name': 'essen',
+                                'description': 'Meal slot Payment',
+                                'timeout': 120, // in seconds
+                                'prefill': {
+                                  'contact': '9961967548',
+                                  'email': 'shyamjp2002@gmail.com'
+                                }
+                              };
+                              _razorpay.open(options);
+                              _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS,
+                                  _handlePaymentSuccess);
+                              _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR,
+                                  _handlePaymentError);
+                              _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET,
+                                  _handleExternalWallet);
+                               _razorpay.open(options);
+
+                              updateSlotStatus(
+                                widget.mealId,
+                              );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SlotDetails(
+                                    mealId: widget.mealId,
+                                    mess: data['hostel'],
+                                    date: data['Date'],
+                                    meal: data['Meal'],
+                                  ),
+                                ),
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF449183),
@@ -110,6 +191,42 @@ class ConfirmSlotPage extends StatelessWidget {
             ),
           );
         }
+      },
+    );
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    
+    updateSlotStatus(widget.mealId,);
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    updateSlotStatus(widget.mealId,);
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    updateSlotStatus(widget.mealId,);
+  }
+
+  void showAlertDialog(BuildContext context, String title, String message){
+    // set up the buttons
+    Widget continueButton = ElevatedButton(
+      child: const Text("Continue"),
+      onPressed:  () {},
+    );
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        continueButton,
+      ],
+    );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
       },
     );
   }
@@ -209,4 +326,3 @@ class ElevatedCard extends StatelessWidget {
     );
   }
 }
-

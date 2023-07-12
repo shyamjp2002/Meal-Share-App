@@ -8,6 +8,7 @@ import './login_page.dart';
 import './welcome_page.dart';
 import '/app_drawer.dart';
 import './guest/guest_home_page.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() async {
 
@@ -15,11 +16,6 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform
   );
-  
-
-
-
-
   runApp(MyApp());
 }
 
@@ -27,7 +23,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter App',
+      title: 'Essen',
+      debugShowCheckedModeBanner: false,
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (BuildContext context,AsyncSnapshot snapshot){
@@ -46,7 +43,7 @@ class MyApp extends StatelessWidget {
           }
           return Center(child: CircularProgressIndicator());
         }
-        
+
 
       ),
       
@@ -88,6 +85,7 @@ class MyApp extends StatelessWidget {
         }).catchError((error) {
           print('Error updating document: $error');
         });
+        
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -135,8 +133,3 @@ class MyApp extends StatelessWidget {
     print(userCredential.user?.displayName);
   }
 }
-
-
-
-
-

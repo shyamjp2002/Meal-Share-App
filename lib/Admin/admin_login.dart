@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import './admin_home_page.dart';
 
-
 class AdminLoginPage extends StatefulWidget {
   @override
   _AdminLoginPageState createState() => _AdminLoginPageState();
@@ -43,38 +42,50 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
         appBar: AppBar(
           title: Text('Admin Login'),
           centerTitle: true,
+          backgroundColor: Color(0xFF449183),
         ),
         body: Center(
           child: Container(
-            padding: EdgeInsets.all(20.0),
+            padding: EdgeInsets.all(40),
             color: Colors.transparent,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: EdgeInsets.all(10.0),
+                  padding: EdgeInsets.all(5.0),
                   decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(10.0),
+                    color: Color.fromARGB(0, 122, 0, 0),
+                    borderRadius: BorderRadius.circular(50),
+                    border: Border.all(
+                      color: Color.fromARGB(255, 228, 228, 228),
+                      width: 1.0,
+                    ),
                   ),
                   child: TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
                       hintText: 'Enter the email',
+                      border: InputBorder
+                          .none, // Add this line to remove the line inside the TextField
                     ),
                   ),
                 ),
                 SizedBox(height: 10.0),
                 Container(
-                  padding: EdgeInsets.all(10.0),
+                  padding: EdgeInsets.all(5.0),
                   decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(10.0),
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(50),
+                    border: Border.all(
+                      color: Color.fromARGB(255, 228, 228, 228),
+                      width: 1.0,
+                    ),
                   ),
                   child: TextField(
                     controller: _passwordController,
                     decoration: InputDecoration(
                       hintText: 'Enter the password',
+                      border: InputBorder.none,
                       errorText: _passwordErrorText.isNotEmpty
                           ? _passwordErrorText
                           : null,
@@ -92,12 +103,32 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                   onPressed: () {
                     _loginWithEmailAndPassword(context);
                   },
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.transparent),
+                  child: Text(
+                    'Login',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: const Color.fromARGB(255, 231, 207, 207),
+                    ),
                   ),
-                  child: Text('LOGIN'),
-                ),
+                  style: ButtonStyle(
+                    minimumSize: MaterialStateProperty.all<Size>(
+                      Size(300.0,
+                          50.0), // Adjust this value to increase the width
+                    ),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                      Color(0xFF449183),
+                    ),
+                    shape: MaterialStateProperty.all<OutlinedBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                        side: BorderSide(
+                          color: Colors.white,
+                          width: 1.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
               ],
             ),
           ),
@@ -105,29 +136,31 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
       ),
     );
   }
+
   void _loginWithEmailAndPassword(BuildContext context) async {
-  final String email = _emailController.text;
-  final String password = _passwordController.text;
+    final String email = _emailController.text;
+    final String password = _passwordController.text;
 
-  try {
-    UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-    // Authentication successful, navigate to the next screen or perform other actions
-    // For example, you can show a success message and navigate to a home screen
-    print('Authentication successful');
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => AdminHomePage()),
-    );
-  } catch (e) {
-    // Authentication failed, display an error message
-    print('Authentication failed: $e');
-    setState(() {
-      _passwordErrorText = 'Invalid username or password';
-    });
+      // Authentication successful, navigate to the next screen or perform other actions
+      // For example, you can show a success message and navigate to a home screen
+      print('Authentication successful');
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => AdminHomePage()),
+      );
+    } catch (e) {
+      // Authentication failed, display an error message
+      print('Authentication failed: $e');
+      setState(() {
+        _passwordErrorText = 'Invalid username or password';
+      });
+    }
   }
-}
 }

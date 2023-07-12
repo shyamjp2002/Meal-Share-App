@@ -2,14 +2,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:google_sign_in/google_sign_in.dart';
 import 'firebase_options.dart';
 import './mess_cut.dart';
 import 'app_drawer.dart';
 import 'app_appbar.dart';
-
-
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -20,7 +18,7 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
   String? userName = FirebaseAuth.instance.currentUser!.displayName;
-  int? _pendingDues;
+  String? _pendingDues;
   String? pending;
   String? _documentId;
   String? _userUid = FirebaseAuth.instance.currentUser!.uid;
@@ -98,7 +96,7 @@ Future<void> getUserData() async {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: 20),
+          SizedBox(height: 0),
           Text(
             'Hi $userName',
             style: TextStyle(
@@ -117,8 +115,9 @@ Future<void> getUserData() async {
               ),
               borderRadius: BorderRadius.circular(10),
             ),
+            
             child: Container(
-              width: 200,
+              width: 300,
               height: 150,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
@@ -127,7 +126,7 @@ Future<void> getUserData() async {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  
+                  SizedBox(height: 5),
                   Text(
                     '₹ $pending',
                     style: TextStyle(
@@ -147,15 +146,59 @@ Future<void> getUserData() async {
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      // Add your logic for payment processing here
+                      Razorpay _razorpay = Razorpay();
+
+                              var options = {
+                                'key': 'rzp_test_NFTzY8U2i63OGJ',
+                                'amount':
+                                    int.parse(pending.toString()), //in the smallest currency sub-unit.
+                                'name': 'essen',
+                                'description': 'Meal slot Payment',
+                                'timeout': 120, // in seconds
+                                'prefill': {
+                                  'contact': '9961967548',
+                                  'email': 'shyamjp2002@gmail.com'
+                                }
+                              };
+                              _razorpay.open(options);
+                              _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS,
+                                  _handlePaymentSuccess);
+                              _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR,
+                                  _handlePaymentError);
+                              _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET,
+                                  _handleExternalWallet);
+                               _razorpay.open(options);
+                               
+                               Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => WelcomeScreen(),
+                          ),
+                        );
                     },
-                    child: Text('Pay now'),
+                    child: Text('Pay now'),style: ButtonStyle(
+                              minimumSize: MaterialStateProperty.all<Size>(
+                                Size(250.0, 40.0),
+                              ),
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                Color.fromARGB(255, 0, 0, 0),
+                              ),
+                              shape: MaterialStateProperty.all<OutlinedBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25.0),
+                                  side: BorderSide(
+                                    color: Color.fromARGB(255, 255, 255, 255),
+                                    width: 1.0,
+                                  ),
+                                ),
+                              ),
+                            ),
                   ),
                 ],
               ),
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 100),
           Text(
             'Today',
             style: TextStyle(
@@ -164,6 +207,7 @@ Future<void> getUserData() async {
               color: Colors.white,
             ),
           ),
+          SizedBox(height: 25,),
           Container(
             padding: EdgeInsets.all(10),
             width: 300,
@@ -177,13 +221,14 @@ Future<void> getUserData() async {
             ),
             child: Column(
               children: [
+                SizedBox(height: 5,),
                 Center(
                   child: Text(
                     formattedDay,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: Color.fromARGB(255, 146, 141, 141),
                     ),
                   ),
                 ),
@@ -222,6 +267,72 @@ Future<void> getUserData() async {
         ],
       ),
     );
+  }
+  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    
+    User? user = FirebaseAuth.instance.currentUser;
+  String currentUid = user!.uid;
+
+  CollectionReference usersCollection =
+      FirebaseFirestore.instance.collection('users');
+
+  QuerySnapshot querySnapshot =
+      await usersCollection.where('uid', isEqualTo: currentUid.toString()).limit(1).get();
+
+  querySnapshot.docs.forEach((documentSnapshot) async {
+    try {
+      await usersCollection
+          .doc(documentSnapshot.id)
+          .update({'Pending': '0'});
+      print('Field updated successfully for document: ${documentSnapshot.id}');
+    } catch (e) {
+      print('Error updating field for document ${documentSnapshot.id}: $e');
+    }
+  });
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) async {
+    User? user = FirebaseAuth.instance.currentUser;
+  String? currentUid = user!.uid;
+
+  CollectionReference usersCollection =
+      FirebaseFirestore.instance.collection('users');
+
+  QuerySnapshot querySnapshot =
+      await usersCollection.where('uid', isEqualTo: currentUid.toString()).limit(1).get();
+
+  querySnapshot.docs.forEach((documentSnapshot) async {
+    try {
+      await usersCollection
+          .doc(documentSnapshot.id)
+          .update({'Pending': '0'});
+      print('Field updated successfully for document: ${documentSnapshot.id}');
+    } catch (e) {
+      print('Error updating field for document ${documentSnapshot.id}: $e');
+    }
+  });
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) async {
+    User? user = FirebaseAuth.instance.currentUser;
+  String currentUid = user!.uid;
+
+  CollectionReference usersCollection =
+      FirebaseFirestore.instance.collection('users');
+
+  QuerySnapshot querySnapshot =
+      await usersCollection.where('uid', isEqualTo: currentUid.toString()).limit(1).get();
+
+  querySnapshot.docs.forEach((documentSnapshot) async {
+    try {
+      await usersCollection
+          .doc(documentSnapshot.id)
+          .update({'Pending': '0'});
+      print('Field updated successfully for document: ${documentSnapshot.id}');
+    } catch (e) {
+      print('Error updating field for document ${documentSnapshot.id}: $e');
+    }
+  });
   }
 }
 

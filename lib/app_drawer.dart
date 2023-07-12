@@ -7,6 +7,7 @@ import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import './share_meal.dart';
 import './shared_slots.dart';
+import './view_messcuts.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({Key? key}) : super(key: key);
@@ -19,30 +20,17 @@ class AppDrawer extends StatelessWidget {
         children: [
           DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: Color(0xFF449183),
             ),
             child: Text(
-              'Meal Share',
+              'Essen',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 24,
               ),
             ),
           ),
-          ListTile(
-            leading: Icon(Icons.add),
-            
-            title: Text('Add Mess'),
-            onTap: () {
-              // Handle Add Mess tile tap
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Messcut()), // Navigate to Messcut widget
-              ); // Close the drawer
-              // Add your code here for the Add Mess functionality
-            },
-          ),
-          ListTile(
+                    ListTile(
             leading: Icon(Icons.home),
             title: Text('Home'),
             onTap: () {
@@ -55,25 +43,51 @@ class AppDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: Icon(Icons.share),
-            title: Text('Share Meal'),
+            leading: Icon(Icons.add),
+            
+            title: Text('Add Mess Cut'),
             onTap: () {
-              // Handle Share Meal tile tap
+              // Handle Add Mess tile tap
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ShareMeal()), // Navigate to Messcut widget
+                MaterialPageRoute(builder: (context) => Messcut()), // Navigate to Messcut widget
               ); // Close the drawer
-              // Add your code here for the Share Meal functionality
+              // Add your code here for the Add Mess functionality
             },
           ),
           ListTile(
-            leading: Icon(Icons.share),
+  leading: Icon(Icons.share_outlined), // Change the icon to share meals icon
+  title: Text('Share Meal'),
+  onTap: () {
+    // Handle Share Meal tile tap
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ShareMeal()), // Navigate to ShareMeal widget
+    ); // Close the drawer
+    // Add your code here for the Share Meal functionality
+  },
+),
+
+          ListTile(
+            leading: Icon(Icons.settings_backup_restore_rounded),
             title: Text('View Shared Meals'),
             onTap: () {
               // Handle Share Meal tile tap
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => SharedMeal()), // Navigate to Messcut widget
+              ); // Close the drawer
+              // Add your code here for the Share Meal functionality
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.settings_backup_restore_rounded),
+            title: Text('View Mess Cuts'),
+            onTap: () {
+              // Handle Share Meal tile tap
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ViewMessCut()), // Navigate to Messcut widget
               ); // Close the drawer
               // Add your code here for the Share Meal functionality
             },

@@ -79,11 +79,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircleAvatar(
-                      radius: 64.0,
-                      backgroundImage: NetworkImage(
-                        'https://media.licdn.com/dms/image/D5603AQGlvWWEKLsfDA/profile-displayphoto-shrink_400_400/0/1671468305752?e=1693440000&v=beta&t=zMVJsJ4LZh3DqOTU3iueZ_Ir3SqgStDjvLfyk_6RWpg',
-                      ),
+                    Icon(
+                      Icons.person,
+                      size: 128.0,
+                      color: Colors.white,
                     ),
                     SizedBox(height: 30.0),
                     Container(
@@ -119,7 +118,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(25.0),
                       ),
-                     padding: EdgeInsets.all(16.0),
+                      padding: EdgeInsets.all(16.0),
                       child: QrImageView(
                         data: _userUid.toString(),
                         version: QrVersions.auto,
@@ -154,4 +153,17 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+}
+
+
+
+
+
+
+
+void main() {
+  runApp(MaterialApp(
+    title: 'Profile Page Demo',
+    home: ProfilePage(),
+  ));
 }

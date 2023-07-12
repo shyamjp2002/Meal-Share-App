@@ -20,7 +20,7 @@ class AppAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text('MealShare App'),
+      title: Text('Essen'),
       backgroundColor: Color(0xFF449183),
       actions: [
         IconButton(
