@@ -1,5 +1,5 @@
 <<<<<<< HEAD
-# test_app
+# Meal Share app
 
 A new Flutter project.
 
